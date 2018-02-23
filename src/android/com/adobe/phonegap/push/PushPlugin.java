@@ -95,19 +95,8 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
 
                         Log.v(LOG_TAG, "execute: senderID=" + senderID);
 
-                        String savedSenderID = sharedPref.getString(SENDER_ID, "");
-                        String savedRegID = sharedPref.getString(REGISTRATION_ID, "");
-
-                        // first time run get new token or new sender
-                        if ("".equals(savedRegID) || !savedSenderID.equals(senderID)) {
-                            Log.v(LOG_TAG, "Getting token");
-                            token = adapter.getToken(getApplicationContext(), senderID);
-                        }
-                        // use the saved one
-                        else {
-                            Log.v(LOG_TAG, "Using saved token");
-                            token = sharedPref.getString(REGISTRATION_ID, "");
-                        }
+                        Log.v(LOG_TAG, "Getting token");
+                        token = adapter.getToken(getApplicationContext(), senderID);
 
                         if (!"".equals(token)) {
                             Log.v(LOG_TAG, "Subscribing to topics" );
@@ -177,8 +166,8 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
                     } catch (IOException e) {
                         Log.e(LOG_TAG, "execute: Got JSON Exception " + e.getMessage());
                         callbackContext.error(e.getMessage());
+                    }
                 }
-            }
             });
         } else if (FINISH.equals(action)) {
             callbackContext.success();
@@ -358,7 +347,7 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
     }
 
     public static boolean isInForeground() {
-      return gForeground;
+        return gForeground;
     }
 
     public static boolean isActive() {
