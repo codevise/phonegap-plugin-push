@@ -120,8 +120,13 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
         mChannel.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI, audioAttributes);
       }
 
-      //JSONArray pattern = channel.optJSONArray(CHANNEL_VIBRATION);
-      //mChannel.setVibrationPattern();
+      if (TRUE.equals(channel.optString(DEFAULT))) {
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(COM_ADOBE_PHONEGAP_PUSH,
+          Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(DEFAULT_CHANNEL, channel.getString(CHANNEL_ID));
+        editor.commit();
+      }
 
       notificationManager.createNotificationChannel(mChannel);
     }

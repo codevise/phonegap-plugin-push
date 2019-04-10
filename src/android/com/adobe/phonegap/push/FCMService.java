@@ -386,22 +386,27 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
     NotificationCompat.Builder mBuilder = null;
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      String channelID = extras.getString(ANDROID_CHANNEL_ID);
+      String channelID = extras.getString(ANDROID_CHANNEL_ID, DEFAULT_CHANNEL_ID);
+      List<NotificationChannel> channels = mNotificationManager.getNotificationChannels();
 
-      // if the push payload specifies a channel use it
-      if (channelID != null) {
-        mBuilder = new NotificationCompat.Builder(context, channelID);
-      } else {
-        List<NotificationChannel> channels = mNotificationManager.getNotificationChannels();
+      // If only one channel exists, use it
+      if (channels.size() == 1) {
+        channelID = channels.get(0).getId();
+      } else if (channels.size() > 1 && !channelWithIdExists(channelID, channels)) {
+        // Use channel with "default" flag
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(COM_ADOBE_PHONEGAP_PUSH,
+          Context.MODE_PRIVATE);
 
-        if (channels.size() == 1) {
+        channelID = sharedPref.getString(DEFAULT_CHANNEL, null);
+
+        // Take first channel as last resort
+        if (channelID == null) {
           channelID = channels.get(0).getId();
-        } else {
-          channelID = extras.getString(ANDROID_CHANNEL_ID, DEFAULT_CHANNEL_ID);
         }
-        Log.d(LOG_TAG, "Using channel ID = " + channelID);
-        mBuilder = new NotificationCompat.Builder(context, channelID);
       }
+
+      mBuilder = new NotificationCompat.Builder(context, channelID);
+      Log.d(LOG_TAG, "Using channel ID = " + channelID);
 
     } else {
       mBuilder = new NotificationCompat.Builder(context);
