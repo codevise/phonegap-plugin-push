@@ -514,6 +514,15 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
     mNotificationManager.notify(appName, notId, mBuilder.build());
   }
 
+  private boolean channelWithIdExists(final String channelID, List<NotificationChannel> channels) {
+    for (NotificationChannel channel : channels) {
+      if (channel != null && channel.getId().equals(channelID)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private void updateIntent(Intent intent, String callback, Bundle extras, boolean foreground, int notId) {
     intent.putExtra(CALLBACK, callback);
     intent.putExtra(PUSH_BUNDLE, extras);
