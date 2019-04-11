@@ -386,16 +386,21 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
     NotificationCompat.Builder mBuilder = null;
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      String channelID = extras.getString(ANDROID_CHANNEL_ID, DEFAULT_CHANNEL_ID);
+      String channelID = extras.getString(ANDROID_CHANNEL_ID);
+      String sound = extras.getString(SOUND);
+      sound = "tor".equals(sound) ? "toralarm" : sound;
       List<NotificationChannel> channels = mNotificationManager.getNotificationChannels();
 
-      // If only one channel exists, use it
       if (channels.size() == 1) {
+        // If only one channel exists, use it
         channelID = channels.get(0).getId();
-      } else if (channels.size() > 1 && !channelWithIdExists(channelID, channels)) {
+      } else if (channelID == null && sound != null && channelWithIdExists(sound, channels)) {
+        // If a sound is configured in the message which name equals an existing channel, use that
+        channelID = sound;
+      } else if (!channelWithIdExists(channelID, channels)) {
         // Use channel with "default" flag
-        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(COM_ADOBE_PHONEGAP_PUSH,
-          Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getApplicationContext()
+          .getSharedPreferences(COM_ADOBE_PHONEGAP_PUSH, Context.MODE_PRIVATE);
 
         channelID = sharedPref.getString(DEFAULT_CHANNEL, null);
 
